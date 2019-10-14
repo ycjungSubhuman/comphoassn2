@@ -1,7 +1,7 @@
 project(comphoassn2)
 cmake_minimum_required(VERSION 3.15)
 
-find_package(OpenCV 4.1.1 REQUIRED COMPONENTS core imgcodecs imgproc)
+find_package(OpenCV 4.1.1 REQUIRED COMPONENTS core imgcodecs imgproc highgui)
 find_package(Boost 1.71 REQUIRED COMPONENTS program_options)
 
 add_library(comphoassn2 src/convolution.cpp src/filter.cpp src/util.cpp src/image.cpp)

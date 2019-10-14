@@ -2,8 +2,11 @@
 #include "filter.hpp"
 #include "util.hpp"
 #include <cassert>
+#include <iostream>
+#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <stdexcept>
+#include <vector>
 
 namespace compho {
 
@@ -62,17 +65,26 @@ SpectralConvolution::SpectralConvolution(cv::Mat kernel)
     : Convolution(std::move(kernel)) {}
 
 cv::Mat SpectralConvolution::apply(const cv::Mat &image) {
+    COMPHO_REQUIRE(image.type() == CV_32FC3);
+
     cv::Mat kernel = get_kernel();
-    cv::Mat image_spectral, kernel_spectral;
-    cv::dft(image, image_spectral);
+    cv::Mat kernel_spectral;
     cv::Mat kernel_normalized =
         normalize_kernel(kernel, image.rows, image.cols);
-    cv::dft(kernel_normalized, kernel_spectral);
+    dft(kernel_normalized, kernel_spectral, cv::DFT_COMPLEX_OUTPUT);
 
-    assert(image_spectral.size == kernel_spectral.size);
+    std::vector<cv::Mat> bgr(3);
+    std::vector<cv::Mat> bgr_filtered(3);
+    cv::split(image, bgr.data());
+    for (size_t i = 0; i < 3; i++) {
+        cv::Mat image_spectral;
+        dft(bgr[i], image_spectral, cv::DFT_COMPLEX_OUTPUT);
+        cv::idft(image_spectral.mul(kernel_spectral), bgr_filtered[i],
+                 cv::DFT_SCALE | cv::DFT_REAL_OUTPUT);
+    }
 
     cv::Mat result;
-    cv::idft(image_spectral * kernel_spectral, result);
+    cv::merge(bgr_filtered.data(), 3, result);
 
     return result;
 }
