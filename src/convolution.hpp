@@ -26,5 +26,11 @@ class SpectralConvolution : public Convolution {
     SpectralConvolution(cv::Mat kernel);
     cv::Mat apply(const cv::Mat &image) override;
 };
+
+class BilateralSpatialConvolution : public Convolution {
+  public:
+    BilateralSpatialConvolution(cv::Mat kernel);
+    cv::Mat apply(const cv::Mat &image) override;
+};
 } // namespace compho
 

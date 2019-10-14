@@ -50,9 +50,8 @@ cv::Mat SpatialConvolution::apply(const cv::Mat &image) {
                 for (int krow = 0; krow < kernel.rows; krow++) {
                     result.at<cv::Vec3f>(row, col) +=
                         kernel.at<float>(krow, kcol) *
-                        image_padded.at<cv::Vec3f>(
-                            row + width_half_kernel - krow,
-                            col + width_half_kernel - kcol);
+                        image_padded.at<cv::Vec3f>(row + kernel.rows - krow,
+                                                   col + kernel.cols - kcol);
                 }
             }
         }
@@ -68,23 +67,76 @@ cv::Mat SpectralConvolution::apply(const cv::Mat &image) {
     COMPHO_REQUIRE(image.type() == CV_32FC3);
 
     cv::Mat kernel = get_kernel();
-    cv::Mat kernel_spectral;
-    cv::Mat kernel_normalized =
-        normalize_kernel(kernel, image.rows, image.cols);
-    dft(kernel_normalized, kernel_spectral, cv::DFT_COMPLEX_OUTPUT);
 
     std::vector<cv::Mat> bgr(3);
     std::vector<cv::Mat> bgr_filtered(3);
-    cv::split(image, bgr.data());
+    int width_half_kernel = kernel.rows / 2;
+    cv::Mat image_padded = pad_image(image, width_half_kernel);
+    cv::split(image_padded, bgr.data());
+
+    cv::Size size_dft;
+    size_dft.width = cv::getOptimalDFTSize(image_padded.cols);
+    size_dft.height = cv::getOptimalDFTSize(image_padded.rows);
+
+    cv::Mat kernel_temp = cv::Mat::zeros(size_dft, kernel.type());
+
+    cv::Mat kernel_spectral;
+    cv::Mat kernel_normalized =
+        normalize_kernel(kernel, size_dft.height, size_dft.width);
+    cv::dft(kernel_normalized, kernel_spectral,
+            cv::DFT_SCALE | cv::DFT_COMPLEX_OUTPUT);
+
     for (size_t i = 0; i < 3; i++) {
         cv::Mat image_spectral;
-        dft(bgr[i], image_spectral, cv::DFT_COMPLEX_OUTPUT);
-        cv::idft(image_spectral.mul(kernel_spectral), bgr_filtered[i],
-                 cv::DFT_SCALE | cv::DFT_REAL_OUTPUT);
+        cv::Mat image_temp = cv::Mat::zeros(size_dft, kernel.type());
+        cv::Mat image_roi =
+            image_temp(cv::Rect(0, 0, image_padded.cols, image_padded.rows));
+        bgr[i].copyTo(image_roi);
+        cv::dft(image_temp, image_spectral, cv::DFT_COMPLEX_OUTPUT);
+
+        cv::Mat multiplied;
+        cv::mulSpectrums(image_spectral, kernel_spectral, multiplied, 0);
+        cv::idft(multiplied, bgr_filtered[i],
+                 cv::DFT_COMPLEX_INPUT | cv::DFT_REAL_OUTPUT);
+        cv::imshow("hoh", bgr_filtered[i]);
+        cv::waitKey();
     }
 
     cv::Mat result;
     cv::merge(bgr_filtered.data(), 3, result);
+
+    cv::Mat wow = result(
+        cv::Rect(width_half_kernel, width_half_kernel, image.cols, image.rows));
+
+    return wow;
+}
+
+BilateralSpatialConvolution::BilateralSpatialConvolution(cv::Mat kernel)
+    : Convolution(std::move(kernel)) {}
+
+cv::Mat BilateralSpatialConvolution::apply(const cv::Mat &image) {
+    COMPHO_REQUIRE(image.type() == CV_32FC3);
+
+    cv::Mat kernel = get_kernel();
+    int width_half_kernel = kernel.rows / 2;
+    cv::Mat image_padded = pad_image(image, width_half_kernel);
+
+    cv::Mat result = cv::Mat::zeros(image.rows, image.cols, image.type());
+    for (int col = 0; col < image.cols; col++) {
+        for (int row = 0; row < image.rows; row++) {
+            // double center = image_padded.at<cv::Vec3f>
+            for (int kcol = 0; kcol < kernel.cols; kcol++) {
+                for (int krow = 0; krow < kernel.rows; krow++) {
+
+                    result.at<cv::Vec3f>(row, col) +=
+                        kernel.at<float>(krow, kcol) *
+                        image_padded.at<cv::Vec3f>(
+                            row + width_half_kernel - krow,
+                            col + width_half_kernel - kcol);
+                }
+            }
+        }
+    }
 
     return result;
 }

@@ -9,7 +9,11 @@ target_link_libraries(comphoassn2 PUBLIC ${OpenCV_LIBS})
 target_include_directories(comphoassn2 PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_compile_options(comphoassn2 PRIVATE -Wall -Wextra)
 
-add_executable(main.out src/main.cpp)
-target_link_libraries(main.out PRIVATE comphoassn2 Boost::program_options)
-target_compile_options(main.out PRIVATE -Wall -Wextra)
+add_executable(app_unsharp src/app_unsharp.cpp)
+target_link_libraries(app_unsharp PRIVATE comphoassn2 Boost::program_options)
+target_compile_options(app_unsharp PRIVATE -Wall -Wextra)
+
+add_executable(app_bilateral src/app_bilateral.cpp)
+target_link_libraries(app_bilateral PRIVATE comphoassn2 Boost::program_options)
+target_compile_options(app_bilateral PRIVATE -Wall -Wextra)
 
