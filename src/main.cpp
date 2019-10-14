@@ -82,7 +82,9 @@ int main(int argc, char **argv) {
     cv::imwrite(vm["output"].as<std::string>(), image_output);
 
     if (vm.count("kernel_output")) {
-        cv::imwrite(vm["kernel_output"].as<std::string>(), kernel);
+        cv::imwrite(vm["kernel_output"].as<std::string>(),
+                    to_char_image(100 * kernel));
+        std::cout << kernel << std::endl;
     }
 
     return 0;

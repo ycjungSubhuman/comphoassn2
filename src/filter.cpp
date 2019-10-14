@@ -55,10 +55,10 @@ cv::Mat get_gaussian_kernel(double sigma, size_t size) {
 
     for (int col = 0; col < int(size); col++) {
         for (int row = 0; row < int(size); row++) {
-            int x = 2.0 * col / size - 1.0;
-            int y = 2.0 * row / size - 1.0;
-            double nx = std::pow(double(x), 2.0) / (2.0 * std::pow(sigma, 2.0));
-            double ny = std::pow(double(y), 2.0) / (2.0 * std::pow(sigma, 2.0));
+            double x = 2.0 * double(col) / double(size) - 1.0;
+            double y = 2.0 * double(row) / double(size) - 1.0;
+            double nx = std::pow(x, 2.0) / (2.0 * std::pow(sigma, 2.0));
+            double ny = std::pow(y, 2.0) / (2.0 * std::pow(sigma, 2.0));
             double v = std::exp(-(nx + ny));
 
             result.at<float>(col, row) = float(v);
