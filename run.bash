@@ -18,7 +18,7 @@ for alpha in ${li_alpha}; do
     alpha_out_files="${alpha_out_files} ${alpha_out_file}"
 done
 echo $alpha_out_files
-montage ${alpha_out_files} -geometry +0+0 -tile $(echo ${li_alpha} | wc -w)x1 data/trump_unsharp_alpha_tile.jpg
+montage ${alpha_out_files} -geometry +0+0 -tile 1x$(echo ${li_alpha} | wc -w) data/trump_unsharp_alpha_tile.jpg
 
 # Test effects of size
 li_size="3 11 21 31"
@@ -35,7 +35,7 @@ for size in ${li_size}; do
     size_out_files="${size_out_files} ${size_out_file}"
 done
 echo $size_out_files
-montage ${size_out_files} -geometry +0+0 -tile $(echo ${li_size} | wc -w)x1 data/trump_unsharp_size_tile.jpg
+montage ${size_out_files} -geometry +0+0 -tile 1x$(echo ${li_size} | wc -w) data/trump_unsharp_size_tile.jpg
 
 # Test effects of different sigma
 li_sigma_s="0.1 0.4 0.7 1.0"
