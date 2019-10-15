@@ -29,8 +29,11 @@ class SpectralConvolution : public Convolution {
 
 class BilateralSpatialConvolution : public Convolution {
   public:
-    BilateralSpatialConvolution(cv::Mat kernel);
+    BilateralSpatialConvolution(cv::Mat kernel, double sigma);
     cv::Mat apply(const cv::Mat &image) override;
+
+  private:
+    double m_sigma;
 };
 } // namespace compho
 

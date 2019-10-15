@@ -1,0 +1,8 @@
+3 / spectral : 63
+3 / spatial : 130
+11 / spectral : 60
+11 / spatial : 1219
+21 / spectral : 59
+21 / spatial : 4259
+31 / spectral : 62
+31 / spatial : 9191
